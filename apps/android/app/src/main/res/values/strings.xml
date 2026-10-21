@@ -3,21 +3,26 @@
     <string name="app_name">DeepSeek Harness</string>
     <string name="app_subtitle">Mobile client</string>
 
-    <string name="setup_intro">The harness is a Node.js application. Run it on this phone with Termux, or on a computer, then connect this app to it. You get the same Web UI a desktop browser opens.</string>
+    <string name="setup_intro">The harness runs inside this app on your phone. You can also point it at a harness running on a computer instead.</string>
 
-    <string name="local_title">Run it on this phone</string>
-    <string name="local_body">Android can host the harness itself inside Termux, a terminal app that ships a Node.js runtime. Install it, paste the two commands below, then tap Check again.</string>
-    <string name="local_commands">pkg install nodejs-lts\nnpx @deepseek-ai/dsh web --no-open</string>
-    <string name="local_step_token">dsh prints a tokenized URL in Termux. Tap Check again, then paste that token.</string>
-    <string name="local_check">Check again</string>
-    <string name="local_copy">Copy commands</string>
-    <string name="local_open_termux">Open Termux</string>
-    <string name="local_probing">Looking for a harness on 127.0.0.1:%1$d\u2026</string>
-    <string name="local_found">Found the harness on this phone. Paste the token dsh printed in Termux.</string>
-    <string name="local_missing">Nothing is listening on 127.0.0.1:%1$d yet. Start dsh in Termux, keep it in the foreground, then check again.</string>
-    <string name="local_termux_missing">Termux is not installed. Install it from F-Droid or the Play Store, then reopen this screen.</string>
-    <string name="local_copied">Commands copied to the clipboard.</string>
-    <string name="local_found_reconnect">Found the harness on this phone. Connecting\u2026</string>
+    <string name="device_card_title">This phone</string>
+    <string name="device_card_body">The harness runtime ships inside this app — no terminal, no package manager, no second app. Start it here, or connect to a computer below.</string>
+    <string name="device_card_note">The agent, its tools, and your workspace all run in the app\u2019s private storage. Model requests go straight from the phone to your provider.</string>
+    <string name="device_start">Start harness on this phone</string>
+
+    <string name="runtime_title">Starting the harness</string>
+    <string name="runtime_sub">The Node runtime and the harness are built into this app. The first start installs them into private storage, which takes a moment; later starts skip it.</string>
+    <string name="runtime_preparing">Preparing\u2026</string>
+    <string name="runtime_starting">Starting the harness server\u2026</string>
+    <string name="runtime_failed">The harness did not start</string>
+    <string name="runtime_log_title">Runtime log</string>
+    <string name="runtime_retry">Try again</string>
+    <string name="runtime_remote">Connect to a computer</string>
+    <string name="menu_restart">Restart harness</string>
+    <string name="menu_logs">Runtime log</string>
+    <string name="menu_device">Run harness on this phone</string>
+    <string name="err_device_failed">The embedded runtime stopped. Open the runtime log to see why.</string>
+
     <string name="setup_step_computer">Or connect to a computer</string>
     <string name="setup_step_one">1 &#183; Start the server</string>
     <string name="setup_command">npx @deepseek-ai/dsh web --host 192.168.1.20 --no-open</string>

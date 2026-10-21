@@ -64,10 +64,19 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private static final int MENU_SCAN = 3;
     private static final int MENU_BROWSER = 4;
     private static final int MENU_ABOUT = 5;
+    private static final int MENU_DEVICE = 6;
+    private static final int MENU_RESTART = 7;
+    private static final int MENU_LOGS = 8;
 
     private WebView webView;
     private View setupPanel;
     private View errorPanel;
+    private View runtimePanel;
+    private TextView runtimeStatus;
+    private TextView runtimeLog;
+    private TextView runtimeLogTitle;
+    private View runtimeSpinner;
+    private Button runtimeRetry;
     private ImageButton menuButton;
     private ProgressBar progress;
     private EditText serverInput;
@@ -80,10 +89,10 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private LinearLayout savedList;
     private TextView savedHeader;
     private Button scanButton;
-    private Button localCheckButton;
     private Button errorRetry;
 
     private ServerStore store;
+    private EmbeddedHarness harness;
     private LanScanner scanner;
     private ServerTarget target;
 
@@ -92,6 +101,8 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private PendingDownload pendingDownload;
 
     private boolean loadedWithToken;
+    private boolean deviceMode;
+    private boolean startingDevice;
     private int lastScanPort = ServerTarget.DEFAULT_HTTP_PORT;
     private long lastBackPressed;
 
@@ -100,16 +111,17 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         store = new ServerStore(this);
+        harness = new EmbeddedHarness(this);
         bindViews();
         configureWebView();
 
         ServerTarget previous = store.last();
         if (previous != null) {
-            // Prefer the stored session cookie; the token is only replayed if the
-            // server restarted and answers 401.
+            // The user chose a computer; prefer the stored session cookie and
+            // replay the token only when the server answers 401.
             open(previous, false);
         } else {
-            showSetup();
+            startOnDevice();
         }
     }
 
@@ -131,8 +143,13 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         errorTitle = findViewById(R.id.error_title);
         errorDetail = findViewById(R.id.error_detail);
         scanButton = findViewById(R.id.scan_button);
-        localCheckButton = findViewById(R.id.local_check_button);
         errorRetry = findViewById(R.id.error_retry);
+        runtimePanel = findViewById(R.id.runtime_panel);
+        runtimeStatus = findViewById(R.id.runtime_status);
+        runtimeLog = findViewById(R.id.runtime_log);
+        runtimeLogTitle = findViewById(R.id.runtime_log_title);
+        runtimeSpinner = findViewById(R.id.runtime_spinner);
+        runtimeRetry = findViewById(R.id.runtime_retry);
 
         ((Button) findViewById(R.id.connect_button)).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,22 +163,28 @@ public class MainActivity extends Activity implements LanScanner.Listener {
                 startScan();
             }
         });
-        localCheckButton.setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.device_start_button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkLocalServer();
+                startOnDevice();
             }
         });
-        ((Button) findViewById(R.id.local_termux_button)).setOnClickListener(new View.OnClickListener() {
+        runtimeRetry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openTermux();
+                startOnDevice();
             }
         });
-        findViewById(R.id.local_commands).setOnClickListener(new View.OnClickListener() {
+        ((Button) findViewById(R.id.runtime_remote)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                copyLocalCommands();
+                showSetup();
+            }
+        });
+        ((Button) findViewById(R.id.error_device)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startOnDevice();
             }
         });
         ((Button) findViewById(R.id.paste_button)).setOnClickListener(new View.OnClickListener() {
@@ -260,6 +283,11 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     }
 
     private void open(ServerTarget next, boolean useToken) {
+        if (deviceMode) {
+            harness.stop();
+            deviceMode = false;
+            startingDevice = false;
+        }
         target = next;
         loadedWithToken = useToken && next.hasToken();
         showWeb();
@@ -318,136 +346,79 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     // ------------------------------------------------------- on this phone
 
     /**
-     * Look for a harness running on the phone itself (Termux) and connect to it.
+     * Bring the bundled harness up on loopback and load its Web UI.
      *
-     * <p>A local server is reachable at 127.0.0.1 from every app, so the check
-     * is one TCP connect with a short timeout rather than a network scan.</p>
+     * <p>The first run unpacks the runtime into private storage; later runs skip
+     * that step. Nothing outside the APK is required.</p>
      */
-    private void checkLocalServer() {
-        final int port = localPort();
-        localCheckButton.setEnabled(false);
-        showStatus(getString(R.string.local_probing, port), false);
-        new Thread(new Runnable() {
+    private void startOnDevice() {
+        deviceMode = true;
+        startingDevice = true;
+        target = null;
+        showRuntime();
+        runtimeStatus.setText(R.string.runtime_preparing);
+        runtimeLog.setText("");
+        runtimeLog.setVisibility(View.GONE);
+        runtimeLogTitle.setVisibility(View.GONE);
+        runtimeRetry.setVisibility(View.GONE);
+        runtimeSpinner.setVisibility(View.VISIBLE);
+        harness.start(new EmbeddedHarness.Listener() {
             @Override
-            public void run() {
-                final boolean reachable = probe("127.0.0.1", port, 800);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        localCheckButton.setEnabled(true);
-                        onLocalProbe(port, reachable);
-                    }
-                });
+            public void onProgress(String stage) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                runtimeStatus.setText(stage);
             }
-        }, "dsh-local-probe").start();
-    }
 
-    private void onLocalProbe(int port, boolean reachable) {
-        if (isFinishing() || isDestroyed()) {
-            return;
-        }
-        if (!reachable) {
-            showStatus(getString(R.string.local_missing, port), true);
-            return;
-        }
-        ServerTarget local = ServerTarget.parse("127.0.0.1:" + port, null);
-        if (local == null) {
-            showStatus(getString(R.string.local_missing, port), true);
-            return;
-        }
-        serverInput.setText(local.baseUrl());
-        ServerTarget remembered = null;
-        for (ServerTarget entry : store.recent()) {
-            if (entry.baseUrl().equals(local.baseUrl())) {
-                remembered = entry;
-                break;
-            }
-        }
-        if (remembered != null && remembered.hasToken() && tokenInput.getText().length() == 0) {
-            tokenInput.setText(remembered.token);
-        }
-        if (tokenInput.getText().length() == 0) {
-            showStatus(getString(R.string.local_found), false);
-            tokenInput.requestFocus();
-            return;
-        }
-        showStatus(getString(R.string.local_found_reconnect), false);
-        connectFromSetup();
-    }
-
-    /**
-     * Probe loopback without touching the UI unless a harness answers.
-     *
-     * <p>The setup screen is often opened right after starting dsh in Termux,
-     * so surfacing the on-device server early saves a round trip.</p>
-     */
-    private void probeLocalQuietly() {
-        new Thread(new Runnable() {
             @Override
-            public void run() {
-                final boolean reachable = probe("127.0.0.1", ServerTarget.DEFAULT_HTTP_PORT, 600);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!reachable || isFinishing() || isDestroyed()
-                                || setupPanel.getVisibility() != View.VISIBLE
-                                || serverInput.getText().length() != 0) {
-                            return;
-                        }
-                        serverInput.setText("http://127.0.0.1:" + ServerTarget.DEFAULT_HTTP_PORT + "/");
-                        showStatus(getString(R.string.local_found), false);
-                        tokenInput.requestFocus();
-                    }
-                });
+            public void onReady(String url) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                startingDevice = false;
+                hideKeyboard();
+                showWeb();
+                webView.loadUrl(url);
             }
-        }, "dsh-local-probe-quiet").start();
-    }
 
-    /** Resolve the port to probe: a typed 127.0.0.1 port wins, else the dsh default. */
-    private int localPort() {
-        ServerTarget typed = ServerTarget.parse(serverInput.getText().toString(), null);
-        if (typed != null && ("127.0.0.1".equals(typed.host) || "localhost".equalsIgnoreCase(typed.host))) {
-            return typed.port;
-        }
-        return ServerTarget.DEFAULT_HTTP_PORT;
-    }
-
-    private static boolean probe(String host, int port, int timeoutMillis) {
-        java.net.Socket socket = new java.net.Socket();
-        try {
-            socket.connect(new java.net.InetSocketAddress(host, port), timeoutMillis);
-            return true;
-        } catch (Exception unreachable) {
-            return false;
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception ignored) {
-                // Nothing to recover from a failing close.
+            @Override
+            public void onFailure(String log) {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
+                startingDevice = false;
+                runtimeStatus.setText(R.string.runtime_failed);
+                runtimeSpinner.setVisibility(View.GONE);
+                runtimeRetry.setVisibility(View.VISIBLE);
+                runtimeLogTitle.setVisibility(View.VISIBLE);
+                runtimeLog.setVisibility(View.VISIBLE);
+                runtimeLog.setText(log.isEmpty() ? getString(R.string.runtime_preparing) : log);
             }
-        }
+        });
     }
 
-    private void copyLocalCommands() {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
-            clipboard.setPrimaryClip(ClipData.newPlainText(
-                    getString(R.string.app_name), getString(R.string.local_commands)));
-        }
-        toast(getString(R.string.local_copied));
+    private void showRuntime() {
+        runtimePanel.setVisibility(View.VISIBLE);
+        setupPanel.setVisibility(View.GONE);
+        errorPanel.setVisibility(View.GONE);
+        webView.setVisibility(View.GONE);
+        menuButton.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
     }
 
-    private void openTermux() {
-        Intent intent = getPackageManager().getLaunchIntentForPackage("com.termux");
-        if (intent == null) {
-            toast(getString(R.string.local_termux_missing));
-            return;
+    private void showRuntimeLog() {
+        showRuntime();
+        runtimeSpinner.setVisibility(View.GONE);
+        runtimeStatus.setText(harness.isRunning() ? R.string.runtime_starting : R.string.runtime_failed);
+        runtimeRetry.setVisibility(harness.isRunning() ? View.GONE : View.VISIBLE);
+        runtimeLogTitle.setVisibility(View.VISIBLE);
+        runtimeLog.setVisibility(View.VISIBLE);
+        StringBuilder joined = new StringBuilder();
+        for (String line : harness.log()) {
+            joined.append(line).append('\n');
         }
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException missing) {
-            toast(getString(R.string.local_termux_missing));
-        }
+        runtimeLog.setText(joined.length() == 0 ? getString(R.string.runtime_preparing) : joined.toString());
     }
 
     // ------------------------------------------------------------------ scan
@@ -513,6 +484,7 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private void showWeb() {
         setupPanel.setVisibility(View.GONE);
         errorPanel.setVisibility(View.GONE);
+        runtimePanel.setVisibility(View.GONE);
         webView.setVisibility(View.VISIBLE);
         menuButton.setVisibility(View.VISIBLE);
         progress.setVisibility(View.VISIBLE);
@@ -521,6 +493,7 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private void showSetup() {
         setupPanel.setVisibility(View.VISIBLE);
         errorPanel.setVisibility(View.GONE);
+        runtimePanel.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
         menuButton.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
@@ -529,9 +502,6 @@ public class MainActivity extends Activity implements LanScanner.Listener {
             tokenInput.setText(target.token == null ? "" : target.token);
         }
         refreshRecent();
-        if (serverInput.getText().length() == 0) {
-            probeLocalQuietly();
-        }
     }
 
     private void refreshRecent() {
@@ -606,10 +576,12 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         errorTitle.setText(title);
         errorDetail.setText(detail);
         setupPanel.setVisibility(View.GONE);
+        runtimePanel.setVisibility(View.GONE);
         webView.setVisibility(View.GONE);
         menuButton.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         errorPanel.setVisibility(View.VISIBLE);
+        deviceMode = false;
         if (loginProblem) {
             errorRetry.setText(R.string.update_token);
             errorRetry.setOnClickListener(new View.OnClickListener() {
@@ -681,12 +653,15 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private void showMenu(View anchor) {
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.getMenu().add(0, MENU_RELOAD, 0, R.string.menu_reload);
-        menu.getMenu().add(0, MENU_CONNECTION, 1, R.string.menu_connection);
-        menu.getMenu().add(0, MENU_SCAN, 2, R.string.menu_scan);
+        menu.getMenu().add(0, MENU_RESTART, 1, R.string.menu_restart);
+        menu.getMenu().add(0, MENU_DEVICE, 2, R.string.menu_device);
+        menu.getMenu().add(0, MENU_LOGS, 3, R.string.menu_logs);
+        menu.getMenu().add(0, MENU_CONNECTION, 4, R.string.menu_connection);
+        menu.getMenu().add(0, MENU_SCAN, 5, R.string.menu_scan);
         if (target != null) {
-            menu.getMenu().add(0, MENU_BROWSER, 3, R.string.menu_open_browser);
+            menu.getMenu().add(0, MENU_BROWSER, 6, R.string.menu_open_browser);
         }
-        menu.getMenu().add(0, MENU_ABOUT, 4, R.string.menu_about);
+        menu.getMenu().add(0, MENU_ABOUT, 7, R.string.menu_about);
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(android.view.MenuItem item) {
@@ -696,6 +671,17 @@ public class MainActivity extends Activity implements LanScanner.Listener {
                             tokenInput.clearFocus();
                             webView.reload();
                         }
+                        return true;
+                    case MENU_RESTART:
+                        harness.stop();
+                        startOnDevice();
+                        return true;
+                    case MENU_DEVICE:
+                        harness.stop();
+                        startOnDevice();
+                        return true;
+                    case MENU_LOGS:
+                        showRuntimeLog();
                         return true;
                     case MENU_CONNECTION:
                         showSetup();
@@ -840,6 +826,16 @@ public class MainActivity extends Activity implements LanScanner.Listener {
             showSetup();
             return;
         }
+        if (runtimePanel.getVisibility() == View.VISIBLE) {
+            if (target != null) {
+                showWeb();
+            } else if (harness.isRunning()) {
+                showRuntimeLog();
+            } else {
+                super.onBackPressed();
+            }
+            return;
+        }
         if (setupPanel.getVisibility() == View.VISIBLE) {
             if (target != null) {
                 showWeb();
@@ -864,7 +860,19 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     // -------------------------------------------------------------- lifecycle
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (deviceMode && !startingDevice && !harness.isRunning()
+                && runtimePanel.getVisibility() != View.VISIBLE) {
+            startOnDevice();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        if (harness != null) {
+            harness.stop();
+        }
         if (scanner != null) {
             scanner.cancel();
             scanner = null;

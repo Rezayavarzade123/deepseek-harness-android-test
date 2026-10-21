@@ -13,3 +13,6 @@ mkdir -p "$out"
   "$here/app/src/main/java/dev/dsh/harness/ServerTarget.java" \
   "$here/tests/ServerTargetTest.java"
 "$JAVA_BIN" -cp "$out" ServerTargetTest
+
+# Packaging rules for the bundled Node runtime (skips when assets are absent).
+bash "$here/tests/runtime-assets-test.sh"

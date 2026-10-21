@@ -1,3 +1,6 @@
 .tools/
 build/
 dist/
+.runtime-build/
+app/src/main/jniLibs/
+app/src/main/assets/runtime/

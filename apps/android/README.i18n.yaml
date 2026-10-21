@@ -3,35 +3,35 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write apps/android/README.md
 /dsh-mobile-client-android-apk:
-  en: 6762449fb9ff7043
-  zh: 6bd9b2781c17f7c8
-/dsh-mobile-client-android-apk/why-the-harness-runs-elsewhere:
-  en: 7339b46a5e62eeb6
-  zh: e9c3a7969ad88079
+  en: c85709b1c33c561c
+  zh: 75b9e327591f04df
+/dsh-mobile-client-android-apk/everything-ships-in-the-apk:
+  en: 6a9f0aea3827b9ec
+  zh: 6ea767770e2b8148
 /dsh-mobile-client-android-apk/run-it-on-the-phone:
-  en: ba0b8e78effa07eb
-  zh: 02fee77b1101637c
+  en: 62392bf399eef43e
+  zh: 9e9485fc9d16f2a7
 /dsh-mobile-client-android-apk/download-and-install:
-  en: f0c495c4b504a7a9
-  zh: 61eea882a3e103d9
+  en: f83c729eb779d43b
+  zh: ed3081e6938bc642
 /dsh-mobile-client-android-apk/connect-to-a-computer:
-  en: 48b429075c803ea4
-  zh: baca0629cb2dc8f7
+  en: b43d8c391ac89854
+  zh: 917ba91845356b93
 /dsh-mobile-client-android-apk/what-the-app-does:
-  en: e684712ee00878ae
-  zh: 69197628b854b6b2
+  en: 213179eeb4c07ebc
+  zh: ab671f3539d975be
 /dsh-mobile-client-android-apk/build:
-  en: 64795d28a2b12930
-  zh: f2238afd0ed02014
+  en: 6194b21aa81c12fe
+  zh: f67ed976248a166d
 /dsh-mobile-client-android-apk/build/tests:
-  en: fff8906668740d7f
-  zh: adb6a9079c6106f8
+  en: 25cc8dd281f6f8f7
+  zh: 4fb4f8526167f0c5
 /dsh-mobile-client-android-apk/layout:
   en: 1ab8b509e0fe148b
   zh: c5295d9510d025f5
 /dsh-mobile-client-android-apk/security:
-  en: 7ed8f787d4951a68
-  zh: 982de74b3bc29e2e
+  en: 44f4a86f4fe95bc0
+  zh: 69efe363a875fbd9
 /dsh-mobile-client-android-apk/limitations:
-  en: ec0587b99ef8ca73
-  zh: f7f9ddc5380e7c5d
+  en: be9428fc5e248330
+  zh: 8bc46244edfac0f7

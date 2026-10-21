@@ -17,6 +17,10 @@
         layout="@layout/view_setup" />
 
     <include
+        android:id="@+id/runtime_panel"
+        layout="@layout/view_runtime" />
+
+    <include
         android:id="@+id/error_panel"
         layout="@layout/view_error" />
 

@@ -27,14 +27,21 @@ D8_JAR="$tools/lib/d8.jar"
 APKSIGNER_JAR="$tools/lib/apksigner.jar"
 ECJ_JAR="$tools/lib/ecj.jar"
 
-VERSION_CODE="${VERSION_CODE:-22}"
+VERSION_CODE="${VERSION_CODE:-23}"
 VERSION_NAME="${VERSION_NAME:-0.2.1-rc.2-android}"
 MIN_SDK=26
-TARGET_SDK=34
+TARGET_SDK=28
 
 KEYSTORE="${DSH_KEYSTORE:-$tools/signing/dsh-mobile.p12}"
 STORE_PASS="${DSH_STORE_PASS:-android}"
 KEY_ALIAS="${DSH_KEY_ALIAS:-dsh-mobile}"
+
+if [ ! -f "$here/app/src/main/assets/runtime/payload.zip" ] \
+  || [ ! -f "$here/app/src/main/assets/runtime/node" ]; then
+  echo "build-apk: the embedded runtime is not staged" >&2
+  echo "build-apk: run scripts/prepare-runtime.sh first" >&2
+  exit 1
+fi
 
 for tool in "$AAPT2" "$ANDROID_JAR" "$D8_JAR" "$APKSIGNER_JAR" "$ECJ_JAR"; do
   if [ ! -e "$tool" ]; then
@@ -91,6 +98,17 @@ done < <(find "$build/classes" -name '*.class' -print)
 echo "==> packaging"
 cp "$build/apk/base.apk" "$build/unsigned.apk"
 ( cd "$build/dex" && zip -q -X -u "$build/unsigned.apk" classes.dex )
+
+# Native runtime: the APK ships Node as libnode.so, so the installer extracts it
+# into nativeLibraryDir (executable) instead of app storage (blocked by W^X).
+assets_src="$here/app/src/main/assets"
+if [ -d "$assets_src" ]; then
+  ( cd "$here/app/src/main" && zip -q -X -r -9 "$build/unsigned.apk" assets -x 'assets/runtime/payload.zip' )
+  # payload.zip is already deflated; storing it saves install time and bytes.
+  if [ -f "$assets_src/runtime/payload.zip" ]; then
+    ( cd "$here/app/src/main" && zip -q -X -0 "$build/unsigned.apk" assets/runtime/payload.zip )
+  fi
+fi
 
 if [ -x "$tools/bin/zipalign" ]; then
   echo "==> aligning"

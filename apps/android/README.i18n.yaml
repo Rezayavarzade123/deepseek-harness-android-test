@@ -1,0 +1,34 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write apps/android/README.md
+/dsh-mobile-client-android-apk:
+  en: aecf43e92f718a24
+  zh: d3c51b0d23df1477
+/dsh-mobile-client-android-apk/why-the-harness-runs-elsewhere:
+  en: 7339b46a5e62eeb6
+  zh: e9c3a7969ad88079
+/dsh-mobile-client-android-apk/install:
+  en: 9d0a470efb53a289
+  zh: d23bc29ff32bb866
+/dsh-mobile-client-android-apk/connect:
+  en: 7fefa03410989c01
+  zh: a25c9408dccec6d9
+/dsh-mobile-client-android-apk/what-the-app-does:
+  en: db99642001047798
+  zh: c5b487101b25a58b
+/dsh-mobile-client-android-apk/build:
+  en: 34601fd458e73552
+  zh: c69f0e04b57250ee
+/dsh-mobile-client-android-apk/build/tests:
+  en: fff8906668740d7f
+  zh: adb6a9079c6106f8
+/dsh-mobile-client-android-apk/layout:
+  en: 1ab8b509e0fe148b
+  zh: c5295d9510d025f5
+/dsh-mobile-client-android-apk/security:
+  en: 7ed8f787d4951a68
+  zh: 982de74b3bc29e2e
+/dsh-mobile-client-android-apk/limitations:
+  en: 77da3b7032990f62
+  zh: 9c387d6f054c6aa1

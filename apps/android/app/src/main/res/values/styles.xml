@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorControlActivated">@color/accent</item>
+        <item name="android:colorControlNormal">@color/muted</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:textColorHint">@color/muted</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+
+    <style name="Title">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">27sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="Body">
+        <item name="android:textColor">@color/muted_strong</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+    </style>
+
+    <style name="BodyMuted" parent="Body">
+        <item name="android:textColor">@color/muted</item>
+    </style>
+
+    <style name="Caption">
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+    </style>
+
+    <style name="SectionLabel">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.12</item>
+    </style>
+
+    <style name="FieldLabel">
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="Code">
+        <item name="android:textColor">#FFD3E7FF</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+    </style>
+
+    <style name="Field">
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textColorHint">@color/muted</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <style name="PrimaryButton" parent="@android:style/Widget.Material.Button">
+        <item name="android:background">@drawable/bg_button_primary</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/on_accent</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:letterSpacing">0.01</item>
+    </style>
+
+    <style name="SecondaryButton" parent="PrimaryButton">
+        <item name="android:background">@drawable/bg_button_secondary</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="ErrorTitle">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+</resources>

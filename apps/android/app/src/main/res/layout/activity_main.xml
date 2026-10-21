@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/setup_panel"
+        layout="@layout/view_setup" />
+
+    <include
+        android:id="@+id/error_panel"
+        layout="@layout/view_error" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="top"
+        android:indeterminate="false"
+        android:max="100"
+        android:progressTint="@color/accent"
+        android:progressBackgroundTint="@color/surface"
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        android:alpha="0.55"
+        android:background="@drawable/bg_menu_button"
+        android:contentDescription="@string/menu"
+        android:padding="7dp"
+        android:src="@drawable/ic_more"
+        android:visibility="gone" />
+
+</FrameLayout>

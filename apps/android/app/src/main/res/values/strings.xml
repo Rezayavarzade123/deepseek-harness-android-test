@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeepSeek Harness</string>
+    <string name="app_subtitle">Mobile client</string>
+
+    <string name="setup_intro">The harness is a Node.js application. Run it on your computer, then connect this phone to it over Wi-Fi. The app talks to the same Web UI you would open in a desktop browser.</string>
+
+    <string name="setup_step_one">1 &#183; Start the server</string>
+    <string name="setup_command">npx @deepseek-ai/dsh web --host 192.168.1.20 --no-open</string>
+    <string name="setup_command_hint">Use your computer\u2019s LAN address in place of 192.168.1.20 (for example the number `hostname -I` or ipconfig prints). Tap the command to copy it. dsh prints a URL that contains a one-time login token.</string>
+
+    <string name="setup_step_two">2 &#183; Connect</string>
+    <string name="setup_step_two_body">Paste the URL dsh printed into the address field below. The app keeps the login cookie, so the token is only needed once per server restart.</string>
+
+    <string name="label_server">Server address</string>
+    <string name="hint_server">192.168.1.20:3080</string>
+    <string name="label_token">Launch token (optional)</string>
+    <string name="hint_token">Paste the token from the printed URL</string>
+
+    <string name="connect">Connect</string>
+    <string name="scan_network">Scan my network</string>
+    <string name="paste">Paste</string>
+
+    <string name="saved_servers">Recent servers</string>
+    <string name="scan_results">Found on your network</string>
+    <string name="row_has_token">Login token saved</string>
+    <string name="row_no_token">No token saved \u2014 paste one if the server asks</string>
+    <string name="row_tap_to_use">Tap to use this address</string>
+    <string name="row_remove_title">Remove server?</string>
+    <string name="row_remove_body">%1$s will be removed from the recent list.</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="scanning">Scanning\u2026</string>
+    <string name="status_scan_selected">Address selected. Paste the launch token if you have one, then tap Connect.</string>
+    <string name="status_download_started">Downloading %1$s</string>
+    <string name="status_download_failed">The download could not be started.</string>
+    <string name="back_to_exit">Press back again to exit</string>
+    <string name="setup_footnote">The harness keeps running on your computer; the phone is a remote control. Traffic is plain HTTP on your local network unless your deployment uses TLS. Never expose dsh directly to the internet \u2014 put a TLS proxy or a VPN in front of it.</string>
+
+    <string name="status_scanning">Scanning your network for port %1$d\u2026</string>
+    <string name="status_scan_empty">No server answered on port %1$d. Check that dsh is running with --host and that both devices share the same network.</string>
+    <string name="status_scan_found">Tap an address below, then connect.</string>
+    <string name="status_pasted">Address pasted. Tap Connect to open it.</string>
+    <string name="status_invalid_address">That address could not be parsed. Use a host or IP, for example 192.168.1.20:3080.</string>
+    <string name="status_clipboard_empty">The clipboard is empty.</string>
+    <string name="status_command_copied">Command copied to the clipboard.</string>
+
+    <string name="retry">Retry</string>
+    <string name="connection_settings">Connection settings</string>
+    <string name="update_token">Update login token</string>
+
+    <string name="err_unreachable_title">Can\u2019t reach the server</string>
+    <string name="err_dns">That host name was not found. Use the computer\u2019s IP address instead.</string>
+    <string name="err_refused">The connection was refused. dsh is probably not listening on this address and port, or a firewall is blocking it.</string>
+    <string name="err_timeout">The connection timed out. Check that the phone and the computer are on the same network.</string>
+    <string name="err_generic">The page could not be loaded.</string>
+    <string name="err_auth_title">Login token rejected</string>
+    <string name="err_auth_detail">The server is running but did not accept this session. Every dsh restart prints a new login URL: paste it again to sign in.</string>
+    <string name="err_renderer">The page renderer stopped. Restarting the view\u2026</string>
+    <string name="err_no_handler">No app can open this link.</string>
+    <string name="err_no_file_picker">No file picker is available on this device.</string>
+    <string name="err_hint">Both devices must be on the same network, dsh must stay running, and the address must include the port.</string>
+
+    <string name="menu">More options</string>
+    <string name="menu_reload">Reload</string>
+    <string name="menu_connection">Connection settings</string>
+    <string name="menu_scan">Scan network</string>
+    <string name="menu_open_browser">Open in browser</string>
+    <string name="menu_about">About</string>
+    <string name="about_title">About this app</string>
+    <string name="about_body">DeepSeek Harness mobile client %1$s\n\nThis is a thin client for the dsh Web UI. The agent, its tools, and your files stay on the machine running dsh; the phone is only the screen.\n\nOpen source: github.com/deepseek-harness/deepseek-harness</string>
+    <string name="copy_command">Copy command</string>
+    <string name="server">Server</string>
+</resources>

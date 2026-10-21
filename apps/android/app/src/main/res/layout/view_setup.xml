@@ -22,7 +22,6 @@
             android:layout_height="76dp"
             android:background="@drawable/bg_logo_tile"
             android:contentDescription="@string/app_name"
-            android:padding="17dp"
             android:src="@drawable/ic_launcher_foreground" />
 
         <TextView

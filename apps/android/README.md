@@ -33,10 +33,12 @@ Then, in the app:
 
 A server on loopback is a secure browser context, so clipboard, crypto, and worker APIs behave as they do over `https://`, unlike a plain-HTTP LAN address. The **Connect to a computer** path below is the alternative when the phone should stay a thin client.
 
-## Install
+## Download and install
+
+The prebuilt APK is checked in at [`releases/dsh-mobile-0.2.1-rc.2-android.apk`](releases/dsh-mobile-0.2.1-rc.2-android.apk), so it downloads from the repository page without a build step. Install it with:
 
 ```sh
-adb install -r apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk
+adb install -r releases/dsh-mobile-0.2.1-rc.2-android.apk
 ```
 
 Sideloading also works: copy the APK to the device and open it (allow installs from the file manager when asked). The APK targets Android 8.0 (API 26) and is signed with the development key the build creates; it is not a Play Store artifact.
@@ -89,7 +91,7 @@ scripts/fetch-toolchain.sh            # once: aapt2, android.jar, d8, apksigner,
 JAVA=/path/to/java scripts/build-apk.sh
 ```
 
-Output: `apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk`, signed and verified at the end of the run.
+Output: `apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk`, signed and verified at the end of the run. Copy it to `releases/` under the same name to publish a new build for download.
 
 Environment overrides:
 
@@ -130,6 +132,7 @@ apps/android
 ├── scripts/fetch-toolchain.sh         aapt2 + platform jars via npm
 ├── scripts/build-apk.sh               aapt2 → ECJ → D8 → apksigner
 ├── tests/run-tests.sh         JVM tests for the parser
+├── releases/                          published APK(s), downloadable from the repo page
 └── dist/                              build output (gitignored)
 ```
 

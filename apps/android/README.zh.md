@@ -33,10 +33,12 @@ npx @deepseek-ai/dsh web --no-open
 
 回环地址上的服务器属于安全的浏览器上下文，因此剪贴板、加密和工作线程相关 API 的表现与 `https://` 一致，不同于明文 HTTP 的局域网地址。当手机只应作为瘦客户端时，下文的 **连接到电脑** 就是替代方案。
 
-## 安装
+## 下载与安装
+
+预编译的 APK 已收录在 [`releases/dsh-mobile-0.2.1-rc.2-android.apk`](releases/dsh-mobile-0.2.1-rc.2-android.apk)，可直接从仓库页面下载，无需自行构建。安装：
 
 ```sh
-adb install -r apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk
+adb install -r releases/dsh-mobile-0.2.1-rc.2-android.apk
 ```
 
 也可以侧载：把 APK 复制到设备上直接打开（按提示允许文件管理器安装应用）。该 APK 面向 Android 8.0（API 26），使用构建时生成的开发密钥签名；它不是 Play Store 制品。
@@ -89,7 +91,7 @@ scripts/fetch-toolchain.sh            # once: aapt2, android.jar, d8, apksigner,
 JAVA=/path/to/java scripts/build-apk.sh
 ```
 
-输出：`apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk`，构建结束时已完成签名与校验。
+输出：`apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk`，构建结束时已完成签名与校验。发布新构建时，把它以同名复制到 `releases/`。
 
 环境变量覆盖：
 
@@ -130,6 +132,7 @@ apps/android
 ├── scripts/fetch-toolchain.sh         aapt2 + platform jars via npm
 ├── scripts/build-apk.sh               aapt2 → ECJ → D8 → apksigner
 ├── tests/run-tests.sh         JVM tests for the parser
+├── releases/                          published APK(s), downloadable from the repo page
 └── dist/                              build output (gitignored)
 ```
 

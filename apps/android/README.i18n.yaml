@@ -11,9 +11,9 @@
 /dsh-mobile-client-android-apk/run-it-on-the-phone:
   en: ba0b8e78effa07eb
   zh: 02fee77b1101637c
-/dsh-mobile-client-android-apk/install:
-  en: 9d0a470efb53a289
-  zh: d23bc29ff32bb866
+/dsh-mobile-client-android-apk/download-and-install:
+  en: f0c495c4b504a7a9
+  zh: 61eea882a3e103d9
 /dsh-mobile-client-android-apk/connect-to-a-computer:
   en: 48b429075c803ea4
   zh: baca0629cb2dc8f7
@@ -21,8 +21,8 @@
   en: e684712ee00878ae
   zh: 69197628b854b6b2
 /dsh-mobile-client-android-apk/build:
-  en: 34601fd458e73552
-  zh: c69f0e04b57250ee
+  en: 64795d28a2b12930
+  zh: f2238afd0ed02014
 /dsh-mobile-client-android-apk/build/tests:
   en: fff8906668740d7f
   zh: adb6a9079c6106f8

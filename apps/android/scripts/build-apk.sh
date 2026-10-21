@@ -143,8 +143,12 @@ rm -f "$out"
   --v1-signing-enabled false \
   --v2-signing-enabled true \
   --v3-signing-enabled true \
+  --v4-signing-enabled false \
   --out "$out" \
   "$build/aligned.apk"
+
+# A stale v4 sidecar from an earlier run would otherwise sit beside the APK.
+rm -f "$out.idsig"
 
 echo "==> verifying"
 "$JAVA_BIN" -jar "$APKSIGNER_JAR" verify --verbose --print-certs "$out"

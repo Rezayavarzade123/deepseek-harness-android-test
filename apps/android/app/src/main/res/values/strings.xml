@@ -25,7 +25,7 @@
     <string name="scan_results">Found on your network</string>
     <string name="row_has_token">Login token saved</string>
     <string name="row_no_token">No token saved \u2014 paste one if the server asks</string>
-    <string name="row_tap_to_use">Tap to use this address</string>
+    <string name="row_tap_to_use">Tap to use this address \u00b7 long-press to remove</string>
     <string name="row_remove_title">Remove server?</string>
     <string name="row_remove_body">%1$s will be removed from the recent list.</string>
     <string name="remove">Remove</string>
@@ -35,6 +35,7 @@
     <string name="status_scan_selected">Address selected. Paste the launch token if you have one, then tap Connect.</string>
     <string name="status_download_started">Downloading %1$s</string>
     <string name="status_download_failed">The download could not be started.</string>
+    <string name="status_download_unsupported">This download is created inside the page and cannot be saved on the phone.</string>
     <string name="back_to_exit">Press back again to exit</string>
     <string name="setup_footnote">The harness keeps running on your computer; the phone is a remote control. Traffic is plain HTTP on your local network unless your deployment uses TLS. Never expose dsh directly to the internet \u2014 put a TLS proxy or a VPN in front of it.</string>
 

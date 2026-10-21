@@ -9,6 +9,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -170,7 +171,11 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     }
 
     private void configureWebView() {
-        WebView.setWebContentsDebuggingEnabled(true);
+        // chrome://inspect is a debugging affordance, not a release feature: an
+        // attached inspector can read the agent session held by the WebView.
+        if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -576,6 +581,12 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     // ------------------------------------------------------------ downloads
 
     private void handleDownload(String url, String contentDisposition, String mimeType) {
+        if (url == null || url.startsWith("blob:") || url.startsWith("data:")) {
+            // DownloadManager only fetches real URLs; a page-created blob has no
+            // address it can reopen.
+            toast(getString(R.string.status_download_unsupported));
+            return;
+        }
         if (Build.VERSION.SDK_INT < 29
                 && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -746,6 +757,11 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
             if (request == null || !request.isForMainFrame() || error == null) {
+                return;
+            }
+            if (error.getErrorCode() == WebViewClient.ERROR_UNKNOWN) {
+                // A superseded or cancelled load reports UNKNOWN; the replacement
+                // navigation owns the screen from here.
                 return;
             }
             CharSequence description = error.getDescription();

@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements LanScanner.Listener {
     private LinearLayout savedList;
     private TextView savedHeader;
     private Button scanButton;
+    private Button localCheckButton;
     private Button errorRetry;
 
     private ServerStore store;
@@ -130,6 +131,7 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         errorTitle = findViewById(R.id.error_title);
         errorDetail = findViewById(R.id.error_detail);
         scanButton = findViewById(R.id.scan_button);
+        localCheckButton = findViewById(R.id.local_check_button);
         errorRetry = findViewById(R.id.error_retry);
 
         ((Button) findViewById(R.id.connect_button)).setOnClickListener(new View.OnClickListener() {
@@ -142,6 +144,24 @@ public class MainActivity extends Activity implements LanScanner.Listener {
             @Override
             public void onClick(View view) {
                 startScan();
+            }
+        });
+        localCheckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkLocalServer();
+            }
+        });
+        ((Button) findViewById(R.id.local_termux_button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openTermux();
+            }
+        });
+        findViewById(R.id.local_commands).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                copyLocalCommands();
             }
         });
         ((Button) findViewById(R.id.paste_button)).setOnClickListener(new View.OnClickListener() {
@@ -295,6 +315,141 @@ public class MainActivity extends Activity implements LanScanner.Listener {
         toast(getString(R.string.status_command_copied));
     }
 
+    // ------------------------------------------------------- on this phone
+
+    /**
+     * Look for a harness running on the phone itself (Termux) and connect to it.
+     *
+     * <p>A local server is reachable at 127.0.0.1 from every app, so the check
+     * is one TCP connect with a short timeout rather than a network scan.</p>
+     */
+    private void checkLocalServer() {
+        final int port = localPort();
+        localCheckButton.setEnabled(false);
+        showStatus(getString(R.string.local_probing, port), false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final boolean reachable = probe("127.0.0.1", port, 800);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        localCheckButton.setEnabled(true);
+                        onLocalProbe(port, reachable);
+                    }
+                });
+            }
+        }, "dsh-local-probe").start();
+    }
+
+    private void onLocalProbe(int port, boolean reachable) {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
+        if (!reachable) {
+            showStatus(getString(R.string.local_missing, port), true);
+            return;
+        }
+        ServerTarget local = ServerTarget.parse("127.0.0.1:" + port, null);
+        if (local == null) {
+            showStatus(getString(R.string.local_missing, port), true);
+            return;
+        }
+        serverInput.setText(local.baseUrl());
+        ServerTarget remembered = null;
+        for (ServerTarget entry : store.recent()) {
+            if (entry.baseUrl().equals(local.baseUrl())) {
+                remembered = entry;
+                break;
+            }
+        }
+        if (remembered != null && remembered.hasToken() && tokenInput.getText().length() == 0) {
+            tokenInput.setText(remembered.token);
+        }
+        if (tokenInput.getText().length() == 0) {
+            showStatus(getString(R.string.local_found), false);
+            tokenInput.requestFocus();
+            return;
+        }
+        showStatus(getString(R.string.local_found_reconnect), false);
+        connectFromSetup();
+    }
+
+    /**
+     * Probe loopback without touching the UI unless a harness answers.
+     *
+     * <p>The setup screen is often opened right after starting dsh in Termux,
+     * so surfacing the on-device server early saves a round trip.</p>
+     */
+    private void probeLocalQuietly() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final boolean reachable = probe("127.0.0.1", ServerTarget.DEFAULT_HTTP_PORT, 600);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!reachable || isFinishing() || isDestroyed()
+                                || setupPanel.getVisibility() != View.VISIBLE
+                                || serverInput.getText().length() != 0) {
+                            return;
+                        }
+                        serverInput.setText("http://127.0.0.1:" + ServerTarget.DEFAULT_HTTP_PORT + "/");
+                        showStatus(getString(R.string.local_found), false);
+                        tokenInput.requestFocus();
+                    }
+                });
+            }
+        }, "dsh-local-probe-quiet").start();
+    }
+
+    /** Resolve the port to probe: a typed 127.0.0.1 port wins, else the dsh default. */
+    private int localPort() {
+        ServerTarget typed = ServerTarget.parse(serverInput.getText().toString(), null);
+        if (typed != null && ("127.0.0.1".equals(typed.host) || "localhost".equalsIgnoreCase(typed.host))) {
+            return typed.port;
+        }
+        return ServerTarget.DEFAULT_HTTP_PORT;
+    }
+
+    private static boolean probe(String host, int port, int timeoutMillis) {
+        java.net.Socket socket = new java.net.Socket();
+        try {
+            socket.connect(new java.net.InetSocketAddress(host, port), timeoutMillis);
+            return true;
+        } catch (Exception unreachable) {
+            return false;
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception ignored) {
+                // Nothing to recover from a failing close.
+            }
+        }
+    }
+
+    private void copyLocalCommands() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            clipboard.setPrimaryClip(ClipData.newPlainText(
+                    getString(R.string.app_name), getString(R.string.local_commands)));
+        }
+        toast(getString(R.string.local_copied));
+    }
+
+    private void openTermux() {
+        Intent intent = getPackageManager().getLaunchIntentForPackage("com.termux");
+        if (intent == null) {
+            toast(getString(R.string.local_termux_missing));
+            return;
+        }
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException missing) {
+            toast(getString(R.string.local_termux_missing));
+        }
+    }
+
     // ------------------------------------------------------------------ scan
 
     private void startScan() {
@@ -374,6 +529,9 @@ public class MainActivity extends Activity implements LanScanner.Listener {
             tokenInput.setText(target.token == null ? "" : target.token);
         }
         refreshRecent();
+        if (serverInput.getText().length() == 0) {
+            probeLocalQuietly();
+        }
     }
 
     private void refreshRecent() {

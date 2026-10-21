@@ -120,9 +120,11 @@ public final class LanScanner {
         });
     }
 
-    /** @return one candidate address per host in the /24 around each local IPv4 address. */
+    /** @return loopback plus one candidate address per host around each local IPv4 address. */
     private static List<String> candidates() {
         Set<String> addresses = new LinkedHashSet<>();
+        // A harness hosted on this phone (Termux) listens on loopback only.
+        addresses.add("127.0.0.1");
         try {
             for (NetworkInterface network : Collections.list(NetworkInterface.getNetworkInterfaces())) {
                 if (!network.isUp() || network.isLoopback()) {

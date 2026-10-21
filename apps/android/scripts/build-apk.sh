@@ -27,7 +27,7 @@ D8_JAR="$tools/lib/d8.jar"
 APKSIGNER_JAR="$tools/lib/apksigner.jar"
 ECJ_JAR="$tools/lib/ecj.jar"
 
-VERSION_CODE="${VERSION_CODE:-21}"
+VERSION_CODE="${VERSION_CODE:-22}"
 VERSION_NAME="${VERSION_NAME:-0.2.1-rc.2-android}"
 MIN_SDK=26
 TARGET_SDK=34

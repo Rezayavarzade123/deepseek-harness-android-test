@@ -3,13 +3,27 @@
     <string name="app_name">DeepSeek Harness</string>
     <string name="app_subtitle">Mobile client</string>
 
-    <string name="setup_intro">The harness is a Node.js application. Run it on your computer, then connect this phone to it over Wi-Fi. The app talks to the same Web UI you would open in a desktop browser.</string>
+    <string name="setup_intro">The harness is a Node.js application. Run it on this phone with Termux, or on a computer, then connect this app to it. You get the same Web UI a desktop browser opens.</string>
 
+    <string name="local_title">Run it on this phone</string>
+    <string name="local_body">Android can host the harness itself inside Termux, a terminal app that ships a Node.js runtime. Install it, paste the two commands below, then tap Check again.</string>
+    <string name="local_commands">pkg install nodejs-lts\nnpx @deepseek-ai/dsh web --no-open</string>
+    <string name="local_step_token">dsh prints a tokenized URL in Termux. Tap Check again, then paste that token.</string>
+    <string name="local_check">Check again</string>
+    <string name="local_copy">Copy commands</string>
+    <string name="local_open_termux">Open Termux</string>
+    <string name="local_probing">Looking for a harness on 127.0.0.1:%1$d\u2026</string>
+    <string name="local_found">Found the harness on this phone. Paste the token dsh printed in Termux.</string>
+    <string name="local_missing">Nothing is listening on 127.0.0.1:%1$d yet. Start dsh in Termux, keep it in the foreground, then check again.</string>
+    <string name="local_termux_missing">Termux is not installed. Install it from F-Droid or the Play Store, then reopen this screen.</string>
+    <string name="local_copied">Commands copied to the clipboard.</string>
+    <string name="local_found_reconnect">Found the harness on this phone. Connecting\u2026</string>
+    <string name="setup_step_computer">Or connect to a computer</string>
     <string name="setup_step_one">1 &#183; Start the server</string>
     <string name="setup_command">npx @deepseek-ai/dsh web --host 192.168.1.20 --no-open</string>
     <string name="setup_command_hint">Use your computer\u2019s LAN address in place of 192.168.1.20 (for example the number `hostname -I` or ipconfig prints). Tap the command to copy it. dsh prints a URL that contains a one-time login token.</string>
 
-    <string name="setup_step_two">2 &#183; Connect</string>
+    <string name="setup_connect_label">Connect</string>
     <string name="setup_step_two_body">Paste the URL dsh printed into the address field below. The app keeps the login cookie, so the token is only needed once per server restart.</string>
 
     <string name="label_server">Server address</string>

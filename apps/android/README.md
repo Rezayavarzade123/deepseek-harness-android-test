@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-A native Android shell for the [DeepSeek Harness](../../README.md) Web UI. It signs in to a `dsh web` server over HTTP(S), keeps the browser session, and wraps the GUI in the affordances a phone needs: a connection screen with LAN discovery, an unreachable/expired-login screen, file uploads, downloads, and microphone access for voice input.
+A native Android shell for the [DeepSeek Harness](../../README.md) Web UI. It signs in to a `dsh web` server over HTTP(S) — on this phone through Termux, or on a computer across the LAN — keeps the browser session, and wraps the GUI in the affordances a phone needs: a connection screen with on-device and LAN discovery, an unreachable/expired-login screen, file uploads, downloads, and microphone access for voice input.
 
 ## Why the harness runs elsewhere
 
@@ -16,6 +16,23 @@ A native Android shell for the [DeepSeek Harness](../../README.md) Web UI. It si
 └───────────────────────┘               └────────────────────────────┘
 ```
 
+## Run it on the phone
+
+Android can host `dsh` itself. The APK does not bundle a runtime, because the harness needs Node.js `^22.19 || >=24` plus native modules built for its platform: the packaged Android runtime on npm (nodejs-mobile) is Node 18, and the harness's native addons have no bionic prebuilds. Termux supplies both.
+
+```sh
+pkg install nodejs-lts
+npx @deepseek-ai/dsh web --no-open
+```
+
+Then, in the app:
+
+1. Tap **Check again** in the **Run it on this phone** card. The app probes `127.0.0.1:3080` and fills in the address.
+2. Paste the token from the URL dsh printed in Termux.
+3. Keep Termux in the foreground while you work, and hold the wake lock (`termux-wake-lock`): Android 12+ kills long-lived background processes unless you also exempt Termux from battery optimization.
+
+A server on loopback is a secure browser context, so clipboard, crypto, and worker APIs behave as they do over `https://`, unlike a plain-HTTP LAN address. The **Connect to a computer** path below is the alternative when the phone should stay a thin client.
+
 ## Install
 
 ```sh
@@ -24,7 +41,7 @@ adb install -r apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk
 
 Sideloading also works: copy the APK to the device and open it (allow installs from the file manager when asked). The APK targets Android 8.0 (API 26) and is signed with the development key the build creates; it is not a Play Store artifact.
 
-## Connect
+## Connect to a computer
 
 On the computer that should run the agent:
 
@@ -49,7 +66,8 @@ Every `dsh` restart prints a new token. When the old one is rejected, the app sh
 | Feature | Detail |
 |---|---|
 | Session | WebView cookies, so the Web UI behaves exactly as in a browser; the token is only replayed after a 401 |
-| LAN discovery | Parallel TCP probe of the local /24 on port 3080, results ordered numerically |
+| On-device host | `Run it on this phone` probes `127.0.0.1:3080`, reuses a saved token, and connects in one tap |
+| LAN discovery | Parallel TCP probe of loopback plus the local /24 on port 3080, results ordered numerically |
 | Recent servers | Up to eight entries with their tokens; long-press to remove |
 | Uploads | Native file picker for `<input type=file>`, including multi-select and camera/gallery providers |
 | Downloads | Android `DownloadManager` with the WebView cookie attached, saved to `Downloads/` |
@@ -124,7 +142,7 @@ apps/android
 
 ## Limitations
 
-* **The phone cannot run the harness.** This app is a client; the host must be running and reachable.
+* **The APK ships no Node runtime.** The harness itself runs either in Termux on the phone or on a computer; this app is the client for it. Bundling Node would mean cross-building the runtime and every native addon for Android.
 * **Blob downloads** (`blob:` URLs created by the page) cannot be handed to `DownloadManager`; only real HTTP downloads are captured.
 * **No background pushes.** Sessions keep running on the host, but the phone learns about new output while the app is open.
 * **WebView version matters.** The Web UI is a modern React application; keep Android System WebView up to date (Play Store) on older devices.

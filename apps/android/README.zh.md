@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-面向 [DeepSeek Harness](../../README.zh.md) Web UI 的原生 Android 外壳。它通过 HTTP(S) 登录 `dsh web` 服务器，保留浏览器会话，并补上手机需要的原生能力：带局域网发现的连接界面、无法连接/登录过期界面、文件上传、下载，以及语音输入的麦克风权限。
+面向 [DeepSeek Harness](../../README.zh.md) Web UI 的原生 Android 外壳。它通过 HTTP(S) 登录 `dsh web` 服务器——可以在本机通过 Termux 运行，也可以在局域网的另一台电脑上运行——保留浏览器会话，并补上手机需要的原生能力：带本机与局域网发现的连接界面、无法连接/登录过期界面、文件上传、下载，以及语音输入的麦克风权限。
 
 ## 为什么把 harness 留在别处运行
 
@@ -16,6 +16,23 @@
 └───────────────────────┘               └────────────────────────────┘
 ```
 
+## 在手机上运行
+
+Android 也能自己承载 `dsh`。APK 不内置运行时，因为 harness 需要 Node.js `^22.19 || >=24`，以及针对目标平台构建的原生模块：npm 上可用的打包版 Android 运行时（nodejs-mobile）是 Node 18，而 harness 的原生插件没有 bionic 预编译产物。Termux 同时提供这两者。
+
+```sh
+pkg install nodejs-lts
+npx @deepseek-ai/dsh web --no-open
+```
+
+然后在应用中：
+
+1. 点击 **在手机上运行** 卡片里的 **重新检查**。应用会探测 `127.0.0.1:3080` 并填入地址。
+2. 粘贴 dsh 在 Termux 中打印的 URL 里的 token。
+3. 使用期间让 Termux 保持在前台，并持有唤醒锁（`termux-wake-lock`）：Android 12 及以上会杀掉长时间运行的后台进程，除非同时把 Termux 排除在电池优化之外。
+
+回环地址上的服务器属于安全的浏览器上下文，因此剪贴板、加密和工作线程相关 API 的表现与 `https://` 一致，不同于明文 HTTP 的局域网地址。当手机只应作为瘦客户端时，下文的 **连接到电脑** 就是替代方案。
+
 ## 安装
 
 ```sh
@@ -24,7 +41,7 @@ adb install -r apps/android/dist/dsh-mobile-0.2.1-rc.2-android.apk
 
 也可以侧载：把 APK 复制到设备上直接打开（按提示允许文件管理器安装应用）。该 APK 面向 Android 8.0（API 26），使用构建时生成的开发密钥签名；它不是 Play Store 制品。
 
-## 连接
+## 连接到电脑
 
 在应当运行 agent 的电脑上执行：
 
@@ -49,7 +66,8 @@ npx @deepseek-ai/dsh web --host 192.168.1.20 --no-open
 | 功能 | 说明 |
 |---|---|
 | 会话 | 使用 WebView cookie，Web UI 的表现与浏览器完全一致；仅在收到 401 后才重放 token |
-| 局域网发现 | 并行 TCP 探测本地 /24 网段的 3080 端口，结果按数值排序 |
+| 本机承载 | “在手机上运行”会探测 `127.0.0.1:3080`，复用已保存的 token，并一键连接 |
+| 局域网发现 | 并行 TCP 探测回环地址与本地 /24 网段的 3080 端口，结果按数值排序 |
 | 最近服务器 | 最多八条记录，附带各自的 token；长按可删除 |
 | 上传 | 为 `<input type=file>` 提供原生文件选择器，支持多选与相机/相册来源 |
 | 下载 | 使用 Android `DownloadManager` 并附带 WebView cookie，保存到 `Downloads/` |
@@ -124,7 +142,7 @@ apps/android
 
 ## 限制
 
-* **手机无法运行 harness。** 本应用是客户端；宿主必须正在运行且可达。
+* **APK 不内置 Node 运行时。** harness 本身要么在手机的 Termux 中运行，要么在电脑上运行；本应用是它的客户端。内置 Node 意味着要为 Android 交叉构建运行时以及每一个原生插件。
 * **Blob 下载**（页面创建的 `blob:` URL）无法交给 `DownloadManager`，只能捕获真正的 HTTP 下载。
 * **没有后台推送。** 会话在宿主上持续运行，但手机只在应用打开时获知新输出。
 * **WebView 版本很重要。** Web UI 是现代化的 React 应用；在旧设备上请保持 Android System WebView（Play Store）为最新版本。
